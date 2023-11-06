@@ -13,6 +13,8 @@ dependencies:
   - plotly
   - pytest
   - tqdm
+  - dvc
+  - dvc-gdrive
   - pip
   - pip:
     - black[jupyter]
