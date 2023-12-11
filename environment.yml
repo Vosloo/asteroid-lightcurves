@@ -12,6 +12,7 @@ dependencies:
   - scikit-learn
   - plotly
   - pytest
+  - pydantic
   - tqdm
   - dvc
   - dvc-gdrive
