@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, validator
 
+from src.model.point import Point
+
 
 class LightCurve(BaseModel):
     """
@@ -11,14 +13,14 @@ class LightCurve(BaseModel):
 
     id: int
     scale: int
-    points: list[list[float]]
+    points: list[Point]
     created_at: datetime = Field(..., alias="created")
     updated_at: datetime = Field(..., alias="modified")
     points_count: int
 
     @validator("points", pre=True)
-    def parse_points(cls, v):
+    def parse_points(cls, points):
         """
         Parse points from a string into a list of lists of floats.
         """
-        return [list(map(float, i.split())) for i in v.split("\n") if i]
+        return [Point.from_list(row.split()) for row in points.split("\n") if row]
