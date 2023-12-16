@@ -4,18 +4,19 @@ channels:
   - defaults
 dependencies:
   - python=3.10
+  - astropy
+  - dvc
+  - dvc-gdrive
   - flake8
   - ipykernel
   - numpy
-  - seaborn
   - pandas
-  - scikit-learn
   - plotly
-  - pytest
   - pydantic
+  - pytest
+  - scikit-learn
+  - seaborn
   - tqdm
-  - dvc
-  - dvc-gdrive
   - pip
   - pip:
     - black[jupyter]
