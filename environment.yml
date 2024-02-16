@@ -11,6 +11,7 @@ dependencies:
   - ipykernel
   - numpy
   - pandas
+  - pyarrow
   - plotly
   - pydantic
   - pytest

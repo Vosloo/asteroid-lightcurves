@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-import warnings
-from datetime import datetime
+# import warnings
+# from datetime import datetime
 
-from astropy.time import Time
+# from astropy.time import Time
 from pydantic import BaseModel, ValidationError, validator
 
-warnings.filterwarnings("ignore", module="erfa")  # Ignore warnings from erfa UTC
+# warnings.filterwarnings("ignore", module="erfa")  # Ignore warnings from erfa UTC
 
 
 class Point(BaseModel):
-    time: datetime
+    JD: float
     brightness: float  # In intensity units
 
     # asteroid-centric cartesian coordinates
@@ -21,22 +21,22 @@ class Point(BaseModel):
     y_earth: float
     z_earth: float
 
-    @validator("time", pre=True)
-    def parse_time(cls, jd):
-        """
-        Convert time from JD to datetime.
-        """
-        return Time(jd, format="jd").datetime
+    # @validator("time", pre=True)
+    # def parse_time(cls, jd):
+    #     """
+    #     Convert time from JD to datetime.
+    #     """
+    #     return Time(jd, format="jd").datetime
 
-    @validator("time")
-    def validate_time(cls, time):
-        """
-        Validate time is between 1900 and 2023.
-        """
-        if time.year < 1900 or time.year > 2023:
-            raise ValidationError("Time must be between 1900 and 2023")
+    # @validator("time")
+    # def validate_time(cls, time):
+    #     """
+    #     Validate time is between 1900 and 2023.
+    #     """
+    #     if time.year < 1900 or time.year > 2023:
+    #         raise ValidationError("Time must be between 1900 and 2023")
 
-        return time
+    #     return time
 
     @staticmethod
     def from_list(data: list) -> Point:
