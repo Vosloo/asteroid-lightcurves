@@ -1,0 +1,5 @@
+outs:
+- md5: 046c0f8fb925a2d3cbbbe32be9f6c510
+  size: 610825
+  hash: md5
+  path: asteroids.csv
