@@ -5,6 +5,7 @@ channels:
 dependencies:
   - python=3.11
   - astropy
+  - beautifulsoup4
   - dvc
   - dvc-gdrive
   - flake8
@@ -21,4 +22,3 @@ dependencies:
   - pip
   - pip:
     - black[jupyter]
-    - PyAstronomy[occult]
