@@ -6,7 +6,6 @@ from typing import Self
 from matplotlib import pyplot as plt
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.config import ConfigDict
-import numpy as np
 
 from src.model.point import Point
 
@@ -45,19 +44,6 @@ class Lightcurve(BaseModel):
             return [Point.from_list(row.split()) for row in points.split("\n") if row]
         else:
             return points
-
-    # @field_validator("points", mode="after")
-    # @classmethod
-    # def normalize_points(cls, points: list[Point]):
-    #     """
-    #     Parse points from a string into a list of lists of floats.
-    #     """
-    #     brightnesses = [point.brightness for point in points]
-    #     mean, std = np.mean(brightnesses), np.std(brightnesses)
-    #     for point in points:
-    #         point.brightness = float((point.brightness - mean) / std)
-
-    #     return points
 
     @model_validator(mode="after")
     def check_points_count(self) -> Self:
