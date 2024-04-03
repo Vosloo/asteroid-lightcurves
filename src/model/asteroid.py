@@ -5,6 +5,7 @@ from functools import cached_property
 import seaborn as sns
 from pydantic import BaseModel
 
+from src.model.enums import EnumSortOptions
 from src.model.lightcurve import Lightcurve
 
 sns.set_theme()
@@ -49,14 +50,33 @@ class Asteroid(BaseModel):
 
         return res
 
-    @cached_property
-    def longest_lightcurve(self) -> Lightcurve:
+    def get_lightcurves(self, by: EnumSortOptions = EnumSortOptions.PERIOD) -> list[Lightcurve]:
+        """
+        Get the lightcurves of the asteroid.
+
+        :return: The lightcurves.
+        """
+        if by == EnumSortOptions.PERIOD:
+            return sorted(self.lightcurves, key=lambda lc: lc.get_period(), reverse=True)
+        elif by == EnumSortOptions.POINTS:
+            return sorted(self.lightcurves, key=lambda lc: lc.points_count, reverse=True)
+        else:
+            options = ["EnumSortOptions." + option.name for option in EnumSortOptions]
+            raise ValueError(f"Invalid 'by' value: {by}, use: {options}")
+
+    def get_longest_lightcurve(self, by: EnumSortOptions = EnumSortOptions.PERIOD) -> Lightcurve:
         """
         Get the longest lightcurve of the asteroid.
 
         :return: The longest lightcurve.
         """
-        return max(self.lightcurves, key=lambda lc: lc.points_count)
+        if by == EnumSortOptions.PERIOD:
+            return max(self.lightcurves, key=lambda lc: lc.get_period())
+        elif by == EnumSortOptions.POINTS:
+            return max(self.lightcurves, key=lambda lc: lc.points_count)
+        else:
+            options = ["EnumSortOptions." + option.name for option in EnumSortOptions]
+            raise ValueError(f"Invalid 'by' value: {by}, use: {options}")
 
     @cached_property
     def map_id_lightcurves(self) -> dict[int, Lightcurve]:

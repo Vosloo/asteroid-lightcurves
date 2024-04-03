@@ -8,7 +8,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-from constants import RAW_DIR
+from constants import ASTEROIDS_DIR
 
 DAMIT_URL = "https://astro.troja.mff.cuni.cz/projects/damit/?q="
 LC_JSON_URI = "https://astro.troja.mff.cuni.cz/projects/damit/light_curves/exportAllForAsteroid/{}/json"
@@ -58,20 +58,24 @@ class AsteroidDownloader:
         response = requests.get(DAMIT_URL + query, headers=choice(request_headers))
         soup = BeautifulSoup(response.content, "html.parser")
 
+        print(f"Beginning asteroid extraction for: {query}...")
         self._extract_asteroid_info(soup, query)
 
     def _extract_asteroid_info(self, soup: BeautifulSoup, query: str) -> float | None:
         table = soup.find("table", class_="damit-table-asteroids-browse")
         if table is None:
+            print(f"No object found for query: {query}!")
             return None
 
         tbody = table.find("tbody")
         if tbody is None:
-            return None
+            raise ValueError(f"No tbody found for query: {query}")
 
         asteroid_name = self._get_asteroid_name(tbody)
 
+        print(f"Found asteroid: {asteroid_name}")
         self._extract_row_models(asteroid_name, tbody)
+        print(f"Finished extracting asteroid {asteroid_name}!")
 
     def _get_asteroid_name(self, tbody: BeautifulSoup) -> str | None:
         tr = tbody.find("tr", class_="damit-asteroid-row")
@@ -82,19 +86,19 @@ class AsteroidDownloader:
 
     def _extract_row_models(self, asteroid_name: str, tbody: BeautifulSoup) -> None:
         trs = tbody.find_all("tr", class_="damit-model-row")
-        trs_len = len(trs)
-        for ind, tr in enumerate(trs):
-            period = self._get_period(tr)
-            if period is None:
-                raise ValueError(f"Period not found for asteroid {asteroid_name}")
+        if len(trs) == 0:
+            raise ValueError(f"No models found for asteroid {asteroid_name}")
 
-            model_num = None
-            if trs_len > 1:
-                model_num = ind + 1
+        print(f"Found {len(trs)} models for {asteroid_name}, selecting the most recent one...")
+        tr = trs[-1]
 
-            asteroid_dir = self._create_asteroid_dir(asteroid_name, model_num)
-            self._download_lc_json(asteroid_name, asteroid_dir)
-            self._save_period(period, asteroid_dir)
+        period = self._get_period(tr)
+        if period is None:
+            raise ValueError(f"Period not found for asteroid {asteroid_name}")
+
+        asteroid_dir = self._create_asteroid_dir(asteroid_name)
+        self._download_lc_json(asteroid_name, asteroid_dir)
+        self._save_period(period, asteroid_dir)
 
     def _match_span(self, tag: BeautifulSoup) -> bool:
         return (
@@ -112,11 +116,8 @@ class AsteroidDownloader:
 
         return None
 
-    def _create_asteroid_dir(self, asteroid_name: str, num: int | None) -> Path:
-        if num is not None:
-            asteroid_name = f"{asteroid_name}_{num}"
-
-        asteroid_dir = Path(RAW_DIR) / asteroid_name
+    def _create_asteroid_dir(self, asteroid_name: str) -> Path:
+        asteroid_dir = Path(ASTEROIDS_DIR) / asteroid_name
         if asteroid_dir.exists():
             raise FileExistsError(f"Directory {asteroid_dir} already exists!")
 
@@ -133,7 +134,11 @@ class AsteroidDownloader:
         with open(lc_file, "w") as f:
             json.dump(lc_json, f, indent=4)
 
+        print(f"Downloaded light curve JSON for asteroid {asteroid_name} to {lc_file}")
+
     def _save_period(self, period: float, asteroid_dir: Path) -> None:
         period_file = asteroid_dir / f"period.txt"
         with open(period_file, "w") as f:
             f.write(str(period))
+
+        print(f"Saved period for asteroid to {period_file}")

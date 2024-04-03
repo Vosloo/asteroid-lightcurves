@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import Self
 
 from matplotlib import pyplot as plt
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.config import ConfigDict
+import numpy as np
 
 from src.model.point import Point
 
@@ -23,7 +27,10 @@ class Lightcurve(BaseModel):
     points_count: int
 
     def __repr__(self) -> str:
-        return f"Lightcurve(id={self.id}, created_at={self.created_at} scale={self.scale}, points_count={self.points_count})"
+        return (
+            f"Lightcurve(id={self.id}, period={self.get_period(in_hours=True):.5f}h "
+            f"scale={self.scale}, points_count={self.points_count})"
+        )
 
     def __str__(self) -> str:
         return self.__repr__()
@@ -34,7 +41,33 @@ class Lightcurve(BaseModel):
         """
         Parse points from a string into a list of lists of floats.
         """
-        return [Point.from_list(row.split()) for row in points.split("\n") if row]
+        if isinstance(points, str):
+            return [Point.from_list(row.split()) for row in points.split("\n") if row]
+        else:
+            return points
+
+    # @field_validator("points", mode="after")
+    # @classmethod
+    # def normalize_points(cls, points: list[Point]):
+    #     """
+    #     Parse points from a string into a list of lists of floats.
+    #     """
+    #     brightnesses = [point.brightness for point in points]
+    #     mean, std = np.mean(brightnesses), np.std(brightnesses)
+    #     for point in points:
+    #         point.brightness = float((point.brightness - mean) / std)
+
+    #     return points
+
+    @model_validator(mode="after")
+    def check_points_count(self) -> Self:
+        """
+        Check that the number of points is equal to the points_count.
+        """
+        if len(self.points) != self.points_count:
+            raise ValueError("Number of points does not match points_count")
+
+        return self
 
     @property
     def first_JD(self) -> float:
@@ -50,7 +83,15 @@ class Lightcurve(BaseModel):
         """
         return self.points[-1].JD
 
-    def plot(self):
+    def get_period(self, in_hours: bool = False) -> float:
+        """
+        Get the period of the light curve converted to hours if less than 1 day.
+        """
+        diff = self.last_JD - self.first_JD
+
+        return diff * 24 if in_hours else diff
+
+    def plot(self, ax=None):
         """
         Plot the light curve.
         """
@@ -61,8 +102,13 @@ class Lightcurve(BaseModel):
             times.append(point.JD)
             brightnesses.append(point.brightness)
 
-        _, ax = plt.subplots(figsize=(15, 10))
-        ax.scatter(times, brightnesses)
-        ax.set_xlabel("JD")
-        ax.set_ylabel("Brightness")
-        ax.set_title(f"Lightcurve (id: {self.id})")
+        if ax is not None:
+            ax.scatter(times, brightnesses)
+            ax.set_xlabel("JD")
+            ax.set_ylabel("Brightness")
+            ax.set_title(f"Lightcurve id={self.id} period={self.get_period(True):.5f}h")
+        else:
+            plt.scatter(times, brightnesses)
+            plt.xlabel("JD")
+            plt.ylabel("Brightness")
+            plt.title(f"Lightcurve id={self.id} period={self.get_period(True):.5f}h")
