@@ -34,6 +34,9 @@ class Lightcurve(BaseModel):
     def __str__(self) -> str:
         return self.__repr__()
 
+    def __len__(self) -> int:
+        return self.points_count
+
     @field_validator("points", mode="before")
     @classmethod
     def parse_points(cls, points):
