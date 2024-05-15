@@ -54,14 +54,17 @@ class AsteroidDownloader:
     def __init__(self, asteroids_df: pd.DataFrame) -> None:
         self._asteroids_df = asteroids_df
 
-    def query_asteroid(self, query: str) -> str:
+    def query_asteroid(self, query: str | int, exists_ok: bool = False) -> str:
+        if isinstance(query, int):
+            query = str(query)
+
         response = requests.get(DAMIT_URL + query, headers=choice(request_headers))
         soup = BeautifulSoup(response.content, "html.parser")
 
         print(f"Beginning asteroid extraction for: {query}...")
-        self._extract_asteroid_info(soup, query)
+        self._extract_asteroid_info(soup, query, exists_ok)
 
-    def _extract_asteroid_info(self, soup: BeautifulSoup, query: str) -> float | None:
+    def _extract_asteroid_info(self, soup: BeautifulSoup, query: str, exists_ok: bool) -> float | None:
         table = soup.find("table", class_="damit-table-asteroids-browse")
         if table is None:
             print(f"No object found for query: {query}!")
@@ -74,7 +77,7 @@ class AsteroidDownloader:
         asteroid_name = self._get_asteroid_name(tbody)
 
         print(f"Found asteroid: {asteroid_name}")
-        self._extract_row_models(asteroid_name, tbody)
+        self._extract_row_models(asteroid_name, tbody, exists_ok)
         print(f"Finished extracting asteroid {asteroid_name}!")
 
     def _get_asteroid_name(self, tbody: BeautifulSoup) -> str | None:
@@ -84,7 +87,7 @@ class AsteroidDownloader:
 
         return a.text.split(") ")[1].strip()
 
-    def _extract_row_models(self, asteroid_name: str, tbody: BeautifulSoup) -> None:
+    def _extract_row_models(self, asteroid_name: str, tbody: BeautifulSoup, exists_ok: bool) -> None:
         trs = tbody.find_all("tr", class_="damit-model-row")
         if len(trs) == 0:
             raise ValueError(f"No models found for asteroid {asteroid_name}")
@@ -96,7 +99,7 @@ class AsteroidDownloader:
         if period is None:
             raise ValueError(f"Period not found for asteroid {asteroid_name}")
 
-        asteroid_dir = self._create_asteroid_dir(asteroid_name)
+        asteroid_dir = self._create_asteroid_dir(asteroid_name, exists_ok)
         self._download_lc_json(asteroid_name, asteroid_dir)
         self._save_period(period, asteroid_dir)
 
@@ -116,12 +119,10 @@ class AsteroidDownloader:
 
         return None
 
-    def _create_asteroid_dir(self, asteroid_name: str) -> Path:
+    def _create_asteroid_dir(self, asteroid_name: str, exists_ok: bool) -> Path:
         asteroid_dir = Path(ASTEROIDS_DIR) / asteroid_name
-        if asteroid_dir.exists():
-            raise FileExistsError(f"Directory {asteroid_dir} already exists!")
 
-        asteroid_dir.mkdir(parents=True)
+        asteroid_dir.mkdir(parents=True, exist_ok=exists_ok)
 
         return asteroid_dir
 
