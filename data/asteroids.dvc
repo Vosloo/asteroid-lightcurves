@@ -1,6 +1,6 @@
 outs:
-- md5: a14dd2b8d436f573f1515c8f4a30c3b7.dir
-  size: 7441281
-  nfiles: 20
+- md5: dd889c213c118510cad28451fa12cf1d.dir
+  size: 52968412
+  nfiles: 180
   hash: md5
   path: asteroids
