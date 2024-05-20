@@ -1,6 +1,9 @@
+import seaborn as sns
 from matplotlib import pyplot as plt
 
 from src.model import Lightcurve
+
+sns.set_theme()
 
 
 class LightcurvePlotter:
@@ -46,14 +49,14 @@ class LightcurvePlotter:
 
         diff = max_JD - min_JD
         if diff < 1:
-            period = f"{diff * 24:.4f} hours"
+            _range = f"{diff * 24:.4f} hours"
         else:
-            period = f"{diff:.4f} days"
+            _range = f"{diff:.4f} days"
 
         if not subplots:
             plt.xlabel("Julian Date")
             plt.ylabel("Brightness")
-            plt.title(f"Lightcurves from {min_JD} to {max_JD} (period={period})")
+            plt.title(f"{len(lightcurves)} lightcurves - range={_range}")
         else:
             plt.tight_layout()
 

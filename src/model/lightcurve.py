@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from functools import cached_property
 from typing import Self
 
 from matplotlib import pyplot as plt
@@ -71,6 +72,20 @@ class Lightcurve(BaseModel):
         Get the end Julian Date of the light curve.
         """
         return self.points[-1].JD
+
+    @cached_property
+    def time_arr(self) -> list[float]:
+        """
+        Get the time of the light curve.
+        """
+        return [point.JD for point in self.points]
+
+    @cached_property
+    def brightness_arr(self) -> list[float]:
+        """
+        Get the brightness of the light curve.
+        """
+        return [point.brightness for point in self.points]
 
     def get_period(self, in_hours: bool = False) -> float:
         """
