@@ -2,18 +2,18 @@ from src.model import Asteroid, Lightcurve
 
 
 class LightcurveBinner:
-    def bin_lightcurves_by_asteroid(
-        self, asteroid: Asteroid, max_time_diff: float, min_n: int | None = None
+    def bin_lightcurves_from_asteroid(
+        self, asteroid: Asteroid, max_time_diff: float, min_bin_size: int | None = None
     ) -> list[list[Lightcurve]]:
-        return self._bin_lightcurves(asteroid.lightcurves, max_time_diff, min_n)
+        return self._bin_lightcurves(asteroid.lightcurves, max_time_diff, min_bin_size)
 
     def bin_lightcurves(
-        self, lightcurves: list[Lightcurve], max_time_diff: float, min_n: int | None = None
+        self, lightcurves: list[Lightcurve], max_time_diff: float, min_bin_size: int | None = None
     ) -> list[list[Lightcurve]]:
-        return self._bin_lightcurves(lightcurves, max_time_diff, min_n)
+        return self._bin_lightcurves(lightcurves, max_time_diff, min_bin_size)
 
     def _bin_lightcurves(
-        self, lightcurves: list[Lightcurve], max_time_diff: float, min_n: int | None = None
+        self, lightcurves: list[Lightcurve], max_time_diff: float, min_bin_size: int | None = None
     ) -> list[list[Lightcurve]]:
         bins: list[list[Lightcurve]] = [[]]
 
@@ -30,8 +30,8 @@ class LightcurveBinner:
 
             bins[curr_bin].append(lc)
 
-        if min_n is not None:
-            bins = self._filter_bins(bins, min_n)
+        if min_bin_size is not None:
+            bins = self._filter_bins(bins, min_bin_size)
 
         return bins
 

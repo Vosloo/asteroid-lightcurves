@@ -59,6 +59,41 @@ class Lightcurve(BaseModel):
 
         return self
 
+    @staticmethod
+    def from_splitted_lightcurve(og_lightcurve: Lightcurve, points: list[Point]) -> Lightcurve:
+        return Lightcurve(
+            id=og_lightcurve.id,
+            scale=og_lightcurve.scale,
+            points=points,
+            created=og_lightcurve.created_at,
+            modified=og_lightcurve.updated_at,
+            points_count=len(points),
+        )
+
+    def get_period(self, in_hours: bool = False) -> float:
+        """
+        Get the period of the light curve converted to hours if less than 1 day.
+        """
+        diff = self.last_JD - self.first_JD
+
+        return diff * 24 if in_hours else diff
+
+    def plot(self, color: tuple):
+        """
+        Plot the light curve.
+        """
+        plt.scatter(self.time_arr, self.brightness_arr, color=color)
+        plt.xlabel("JD")
+        plt.ylabel("Brightness")
+
+        diff = self.last_JD - self.first_JD
+        if diff < 1:
+            _range = f"{diff * 24:.4f} hours"
+        else:
+            _range = f"{diff:.4f} days"
+
+        plt.title(f"Lightcurve id={self.id} - range={_range}")
+
     @property
     def first_JD(self) -> float:
         """
@@ -86,33 +121,3 @@ class Lightcurve(BaseModel):
         Get the brightness of the light curve.
         """
         return [point.brightness for point in self.points]
-
-    def get_period(self, in_hours: bool = False) -> float:
-        """
-        Get the period of the light curve converted to hours if less than 1 day.
-        """
-        diff = self.last_JD - self.first_JD
-
-        return diff * 24 if in_hours else diff
-
-    def plot(self, ax=None):
-        """
-        Plot the light curve.
-        """
-        brightnesses = []
-        times = []
-
-        for point in self.points:
-            times.append(point.JD)
-            brightnesses.append(point.brightness)
-
-        if ax is not None:
-            ax.scatter(times, brightnesses)
-            ax.set_xlabel("JD")
-            ax.set_ylabel("Brightness")
-            ax.set_title(f"Lightcurve id={self.id} period={self.get_period(True):.5f}h")
-        else:
-            plt.scatter(times, brightnesses)
-            plt.xlabel("JD")
-            plt.ylabel("Brightness")
-            plt.title(f"Lightcurve id={self.id} period={self.get_period(True):.5f}h")
