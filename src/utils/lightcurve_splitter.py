@@ -6,11 +6,11 @@ class LightcurveSplitter:
         self,
         lightcurves: list[Lightcurve],
         max_time_diff: float,
-        threshold: int | None = None,
+        min_no_points: int | None = None,
     ) -> list[Lightcurve]:
         splitted_lightcurves = []
         for lightcurve in lightcurves:
-            splitted_lightcurves.extend(self._split_lightcurve(lightcurve, max_time_diff, threshold))
+            splitted_lightcurves.extend(self._split_lightcurve(lightcurve, max_time_diff, min_no_points))
 
         return splitted_lightcurves
 
@@ -18,15 +18,15 @@ class LightcurveSplitter:
         self,
         lightcurve: Lightcurve,
         max_time_diff: float,
-        threshold: int | None = None,
+        min_no_points: int | None = None,
     ) -> list[Lightcurve]:
-        return self._split_lightcurve(lightcurve, max_time_diff, threshold)
+        return self._split_lightcurve(lightcurve, max_time_diff, min_no_points)
 
     def _split_lightcurve(
         self,
         lightcurve: Lightcurve,
         max_time_diff: float,
-        threshold: int | None = None,
+        min_no_points: int | None = None,
     ) -> list[Lightcurve]:
         splitted_lightcurves = []
 
@@ -37,14 +37,14 @@ class LightcurveSplitter:
                 continue
 
             if point.JD - curr_points[0].JD > max_time_diff:
-                if threshold is None or len(curr_points) >= threshold:
+                if min_no_points is None or len(curr_points) >= min_no_points:
                     splitted_lightcurves.append(Lightcurve.from_splitted_lightcurve(lightcurve, curr_points))
 
                 curr_points = []
 
             curr_points.append(point)
 
-        if curr_points and (threshold is None or len(curr_points) >= threshold):
+        if curr_points and (min_no_points is None or len(curr_points) >= min_no_points):
             splitted_lightcurves.append(Lightcurve.from_splitted_lightcurve(lightcurve, curr_points))
 
         return splitted_lightcurves
