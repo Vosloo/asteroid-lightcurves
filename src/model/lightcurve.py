@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import cached_property
 from typing import Self
 
+import seaborn as sns
 from matplotlib import pyplot as plt
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.config import ConfigDict
@@ -29,7 +30,7 @@ class Lightcurve(BaseModel):
     def __repr__(self) -> str:
         return (
             f"Lightcurve(id={self.id}, period={self.get_period(in_hours=True):.5f}h "
-            f"scale={self.scale}, points_count={self.points_count})"
+            f"points_count={self.points_count}, first_JD={self.first_JD}, last_JD={self.last_JD})"
         )
 
     def __str__(self) -> str:
@@ -78,11 +79,14 @@ class Lightcurve(BaseModel):
 
         return diff * 24 if in_hours else diff
 
-    def plot(self, color: tuple):
+    def plot(self, color: tuple | None = None):
         """
         Plot the light curve.
         """
-        plt.scatter(self.time_arr, self.brightness_arr, color=color)
+        if color is None:
+            color = sns.color_palette("icefire")[0]
+
+        plt.scatter(self.time_arr, self.brightness_arr, color=color, s=5)
         plt.xlabel("JD")
         plt.ylabel("Brightness")
 
