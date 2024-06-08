@@ -1,7 +1,7 @@
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-from src.model import Lightcurve
+from astrofit.model import Lightcurve
 
 plt.rcParams["figure.figsize"] = (12, 6)
 sns.set_theme()

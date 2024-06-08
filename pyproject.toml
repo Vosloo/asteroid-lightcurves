@@ -1,0 +1,28 @@
+[project]
+authors = [
+  {name = "Marek Szydłowski", email = "marek.szydlow@gmail.com"},
+]
+description = "A package for determining asteroid characteristics from its light curves."
+name = "astrofit"
+version = "0.1"
+requires-python = ">= 3.11"
+dependencies = [
+  "astropy",
+  "beautifulsoup4",
+  "dvc",
+  "dvc-gdrive",
+  "flake8",
+  "ipykernel",
+  "numpy",
+  "pandas",
+  "pyarrow",
+  "plotly",
+  "pydantic",
+  "pytest",
+  "scikit-learn",
+  "seaborn",
+  "tqdm",
+  "black[jupyter]",
+  "lightkurve",
+  "torch",
+]

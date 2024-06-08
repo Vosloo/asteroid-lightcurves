@@ -1,4 +1,4 @@
-from src.model import Asteroid, Lightcurve
+from astrofit.model import Asteroid, Lightcurve
 
 from .enums import BinningMethod
 

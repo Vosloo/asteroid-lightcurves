@@ -1,6 +1,8 @@
 name: mgr
 channels:
   - conda-forge
+  - pytorch
+  - nvidia
   - defaults
 dependencies:
   - python=3.11
@@ -17,6 +19,8 @@ dependencies:
   - pydantic
   - pytest
   - scikit-learn
+  - torch
+  - pytorch-cuda==12.1
   - seaborn
   - tqdm
   - pip

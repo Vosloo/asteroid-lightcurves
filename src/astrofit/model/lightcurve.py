@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.config import ConfigDict
 
-from src.model.point import Point
+from astrofit.model.point import Point
 
 
 class Lightcurve(BaseModel):

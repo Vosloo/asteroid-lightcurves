@@ -5,8 +5,8 @@ from functools import cached_property
 import seaborn as sns
 from pydantic import BaseModel
 
-from src.model.enums import EnumSortOptions
-from src.model.lightcurve import Lightcurve
+from astrofit.model.enums import EnumSortOptions
+from astrofit.model.lightcurve import Lightcurve
 
 sns.set_theme()
 

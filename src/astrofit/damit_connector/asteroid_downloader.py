@@ -1,5 +1,3 @@
-# flake8: noqa
-# type: ignore
 import json
 from pathlib import Path
 from random import choice
@@ -7,8 +5,6 @@ from random import choice
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-
-from constants import ASTEROIDS_DIR
 
 DAMIT_URL = "https://astro.troja.mff.cuni.cz/projects/damit/?q="
 LC_JSON_URI = "https://astro.troja.mff.cuni.cz/projects/damit/light_curves/exportAllForAsteroid/{}/json"
@@ -51,10 +47,13 @@ request_headers = [
 
 
 class AsteroidDownloader:
-    def __init__(self, asteroids_df: pd.DataFrame) -> None:
-        self._asteroids_df = asteroids_df
+    def __init__(self, data_dir: Path | str) -> None:
+        self._data_dir = Path(data_dir)
+        self._asteroids_dir = self._data_dir / "asteroids"
 
-    def query_asteroid(self, query: str | int, exists_ok: bool = False) -> str:
+        self._asteroids_df = self._load_asteroids_df()
+
+    def query_asteroid(self, query: str | int, exists_ok: bool = False) -> None:
         if isinstance(query, int):
             query = str(query)
 
@@ -64,7 +63,18 @@ class AsteroidDownloader:
         print(f"Beginning asteroid extraction for: {query}...")
         self._extract_asteroid_info(soup, query, exists_ok)
 
-    def _extract_asteroid_info(self, soup: BeautifulSoup, query: str, exists_ok: bool) -> float | None:
+    def _load_asteroids_df(self) -> pd.DataFrame:
+        asteroid_csv = self._data_dir / "asteroids.csv"
+        if not asteroid_csv.exists():
+            raise FileNotFoundError(f"Could not find `asteroids.csv` in {self._data_dir}!")
+
+        asteroids_df = pd.read_csv(asteroid_csv, index_col=0)
+        asteroids_df.dropna(subset=["number"], inplace=True)
+        asteroids_df["number"] = asteroids_df["number"].astype(int)
+
+        return asteroids_df
+
+    def _extract_asteroid_info(self, soup: BeautifulSoup, query: str, exists_ok: bool) -> None:
         table = soup.find("table", class_="damit-table-asteroids-browse")
         if table is None:
             print(f"No object found for query: {query}!")
@@ -74,18 +84,20 @@ class AsteroidDownloader:
         if tbody is None:
             raise ValueError(f"No tbody found for query: {query}")
 
-        asteroid_name = self._get_asteroid_name(tbody)
+        asteroid_name = self._get_asteroid_name(tbody)  # type: ignore
+        if asteroid_name is None:
+            raise ValueError(f"No asteroid name found for query: {query}")
 
         print(f"Found asteroid: {asteroid_name}")
-        self._extract_row_models(asteroid_name, tbody, exists_ok)
+        self._extract_row_models(asteroid_name, tbody, exists_ok)  # type: ignore
         print(f"Finished extracting asteroid {asteroid_name}!")
 
     def _get_asteroid_name(self, tbody: BeautifulSoup) -> str | None:
         tr = tbody.find("tr", class_="damit-asteroid-row")
-        th = tr.find("th")
-        a = th.find("a")
+        th = tr.find("th")  # type: ignore
+        a = th.find("a")  # type: ignore
 
-        return a.text.split(") ")[1].strip()
+        return a.text.split(") ")[1].strip()  # type: ignore
 
     def _extract_row_models(self, asteroid_name: str, tbody: BeautifulSoup, exists_ok: bool) -> None:
         trs = tbody.find_all("tr", class_="damit-model-row")
@@ -120,7 +132,7 @@ class AsteroidDownloader:
         return None
 
     def _create_asteroid_dir(self, asteroid_name: str, exists_ok: bool) -> Path:
-        asteroid_dir = Path(ASTEROIDS_DIR) / asteroid_name
+        asteroid_dir = self._asteroids_dir / asteroid_name
 
         asteroid_dir.mkdir(parents=True, exist_ok=exists_ok)
 
@@ -138,7 +150,7 @@ class AsteroidDownloader:
         print(f"Downloaded light curve JSON for asteroid {asteroid_name} to {lc_file}")
 
     def _save_period(self, period: float, asteroid_dir: Path) -> None:
-        period_file = asteroid_dir / f"period.txt"
+        period_file = asteroid_dir / "period.txt"
         with open(period_file, "w") as f:
             f.write(str(period))
 

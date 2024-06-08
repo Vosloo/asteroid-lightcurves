@@ -1,4 +1,4 @@
-from src.model import Lightcurve
+from astrofit.model import Lightcurve
 
 
 class LightcurveSplitter:

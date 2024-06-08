@@ -1,15 +1,18 @@
 import json
+from pathlib import Path
 import pandas as pd
 
-from constants import ASTEROIDS_DIR, DATA_DIR
-from src.model import Asteroid
+from astrofit.model import Asteroid
 
 PERIOD_FILE = "period.txt"
 LC_FILE = "lc.json"
 
 
 class AsteroidLoader:
-    def __init__(self) -> None:
+    def __init__(self, data_dir: Path | str) -> None:
+        self._data_dir = Path(data_dir)
+        self._asteroids_dir = self._data_dir / "asteroids"
+
         self._asteroids_df = self._load_asteroids_df()
         self._available_asteroids = self._get_available_asteroids()
 
@@ -22,7 +25,7 @@ class AsteroidLoader:
     def load_asteroid(self, asteroid_name: str) -> Asteroid:
         asteroid_info = self.get_asteroid_info(asteroid_name)
 
-        asteroid_data_path = ASTEROIDS_DIR / asteroid_name / LC_FILE
+        asteroid_data_path = self._asteroids_dir / asteroid_name / LC_FILE
         if not asteroid_data_path.exists():
             raise FileNotFoundError(f"Missing light curve data for asteroid {asteroid_name}!")
 
@@ -37,9 +40,9 @@ class AsteroidLoader:
         return self._available_asteroids
 
     def _load_asteroids_df(self) -> pd.DataFrame:
-        asteroid_csv = DATA_DIR / "asteroids.csv"
+        asteroid_csv = self._data_dir / "asteroids.csv"
         if not asteroid_csv.exists():
-            raise FileNotFoundError(f"Could not find `asteroids.csv` in {DATA_DIR}!")
+            raise FileNotFoundError(f"Could not find `asteroids.csv` in {self._data_dir}!")
 
         asteroids_df = pd.read_csv(asteroid_csv, index_col=0)
         asteroids_df.dropna(subset=["number"], inplace=True)
@@ -49,7 +52,7 @@ class AsteroidLoader:
 
     def _get_available_asteroids(self) -> dict[str, dict]:
         available_asteroids = {}
-        for directory in ASTEROIDS_DIR.iterdir():
+        for directory in self._asteroids_dir.iterdir():
             if not directory.is_dir():
                 continue
 
