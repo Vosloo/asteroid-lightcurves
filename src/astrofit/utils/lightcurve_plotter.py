@@ -1,7 +1,7 @@
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-from astrofit.model import Lightcurve
+from astrofit.model import Lightcurve, LightcurveBin
 
 plt.rcParams["figure.figsize"] = (12, 6)
 sns.set_theme()
@@ -17,7 +17,7 @@ class LightcurvePlotter:
         lightcurve.plot(color=sns.color_palette("icefire")[0])
         plt.show()
 
-    def plot_lightcurves(self, lightcurves: list[Lightcurve], split_plots: bool = False):
+    def plot_lightcurves(self, lightcurves: list[Lightcurve] | LightcurveBin, split_plots: bool = False):
         """
         Plot the light curves.
 
@@ -60,7 +60,7 @@ class LightcurvePlotter:
 
     def plot_phased_lightcurves(
         self,
-        lightcurves: list[Lightcurve],
+        lightcurves: list[Lightcurve] | LightcurveBin,
         period: float,
         known_period: float | None = None,
     ):
