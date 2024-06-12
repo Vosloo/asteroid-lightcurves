@@ -1,6 +1,6 @@
 from astrofit.model import Asteroid, Lightcurve, LightcurveBin
 
-from .enums import BinningMethod
+from .enums import BinningMethodEnum
 
 
 class LightcurveBinner:
@@ -8,7 +8,7 @@ class LightcurveBinner:
         self,
         asteroid: Asteroid,
         max_time_diff: float,
-        binning_method: BinningMethod = BinningMethod.FIRST_TO_FIRST_DIFF,
+        binning_method: BinningMethodEnum = BinningMethodEnum.FIRST_TO_FIRST_DIFF,
         min_bin_size: int | None = None,
     ) -> list[LightcurveBin]:
         return self._bin_lightcurves(asteroid.lightcurves, max_time_diff, binning_method, min_bin_size)
@@ -17,7 +17,7 @@ class LightcurveBinner:
         self,
         lightcurves: list[Lightcurve],
         max_time_diff: float,
-        binning_method: BinningMethod = BinningMethod.FIRST_TO_FIRST_DIFF,
+        binning_method: BinningMethodEnum = BinningMethodEnum.FIRST_TO_FIRST_DIFF,
         min_bin_size: int | None = None,
     ) -> list[LightcurveBin]:
         return self._bin_lightcurves(lightcurves, max_time_diff, binning_method, min_bin_size)
@@ -26,7 +26,7 @@ class LightcurveBinner:
         self,
         lightcurves: list[Lightcurve],
         max_time_diff: float,
-        binning_method: BinningMethod = BinningMethod.FIRST_TO_FIRST_DIFF,
+        binning_method: BinningMethodEnum = BinningMethodEnum.FIRST_TO_FIRST_DIFF,
         min_bin_size: int | None = None,
     ) -> list[LightcurveBin]:
         bins: list[LightcurveBin] = []
@@ -36,17 +36,17 @@ class LightcurveBinner:
         last_bin_JD = None
         for lc in lightcurves:
             if last_bin_JD is None:
-                if binning_method == BinningMethod.FIRST_TO_FIRST_DIFF:
+                if binning_method == BinningMethodEnum.FIRST_TO_FIRST_DIFF:
                     last_bin_JD = lc.first_JD
-                elif binning_method == BinningMethod.LAST_TO_FIRST_DIFF:
+                elif binning_method == BinningMethodEnum.LAST_TO_FIRST_DIFF:
                     last_bin_JD = lc.last_JD
 
             if lc.first_JD - last_bin_JD > max_time_diff:
                 curr_bin += 1
 
-                if binning_method == BinningMethod.FIRST_TO_FIRST_DIFF:
+                if binning_method == BinningMethodEnum.FIRST_TO_FIRST_DIFF:
                     last_bin_JD = lc.first_JD
-                elif binning_method == BinningMethod.LAST_TO_FIRST_DIFF:
+                elif binning_method == BinningMethodEnum.LAST_TO_FIRST_DIFF:
                     last_bin_JD = lc.last_JD
 
                 bins.append(LightcurveBin(lightcurves=bin_lightcurves))

@@ -1,6 +1,6 @@
 __all__ = [
-    "BinningMethod",
+    "BinningMethodEnum",
 ]
 
 
-from astrofit.utils.enums.binning_method import BinningMethod
+from astrofit.utils.enums.binning_method_enum import BinningMethodEnum

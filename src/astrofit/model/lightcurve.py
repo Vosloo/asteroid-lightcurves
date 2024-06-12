@@ -61,7 +61,7 @@ class Lightcurve(BaseModel):
         return self
 
     @staticmethod
-    def from_splitted_lightcurve(og_lightcurve: Lightcurve, points: list[Point]) -> Lightcurve:
+    def from_points(og_lightcurve: Lightcurve, points: list[Point]) -> Lightcurve:
         return Lightcurve(
             id=og_lightcurve.id,
             scale=og_lightcurve.scale,
@@ -78,6 +78,14 @@ class Lightcurve(BaseModel):
         diff = self.last_JD - self.first_JD
 
         return diff * 24 if in_hours else diff
+
+    def merge(self, other: Lightcurve) -> Lightcurve:
+        """
+        Merge two light curves.
+        """
+        sorted_points = sorted(self.points + other.points, key=lambda p: p.JD)
+
+        return Lightcurve.from_points(self, sorted_points)
 
     def plot(self, color: tuple | None = None):
         """

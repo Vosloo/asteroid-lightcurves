@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
+from typing import Iterator
 
 from pydantic import BaseModel
 
@@ -13,14 +14,16 @@ class LightcurveBin(BaseModel):
     def __len__(self) -> int:
         return len(self.lightcurves)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Lightcurve]:
         return iter(self.lightcurves)
 
-    def __getitem__(self, item):
-        return self.lightcurves[item]
+    def __getitem__(self, ind) -> Lightcurve:
+        return self.lightcurves[ind]
 
     def __repr__(self) -> str:
-        return f"LightcurveBin(lightcurves={len(self.lightcurves)}, period={self.get_period():.5f}h)"
+        return (
+            f"LightcurveBin(lightcurves={len(self.lightcurves)}, period={self.get_period():.5f}h, points={self.points_count})"
+        )
 
     def __lt__(self, other: LightcurveBin) -> bool:
         return len(self) < len(other)
@@ -49,6 +52,10 @@ class LightcurveBin(BaseModel):
     @cached_property
     def last_JD(self) -> float:
         return self.lightcurves[-1].last_JD
+
+    @cached_property
+    def points_count(self) -> int:
+        return sum(len(lc) for lc in self.lightcurves)
 
     @cached_property
     def times(self) -> list[float]:

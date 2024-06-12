@@ -3,9 +3,9 @@ from __future__ import annotations
 from functools import cached_property
 
 import seaborn as sns
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
-from astrofit.model.enums import EnumSortOptions
+from astrofit.model.enums import EnumSortOption
 from astrofit.model.lightcurve import Lightcurve
 
 sns.set_theme()
@@ -20,6 +20,34 @@ class Asteroid(BaseModel):
     name: str
     period: float
     lightcurves: list[Lightcurve]
+
+    @field_validator("lightcurves")
+    @classmethod
+    def sort_lightcurves(cls, v: list[Lightcurve]) -> list[Lightcurve]:
+        # Pre-sort lightcurves by first_JD
+        lightcurves = sorted(v, key=lambda lc: lc.first_JD)
+
+        # Merge lightcurves that overlap
+        sorted_lightcurves = []
+        curr_ind = 0
+        curr_lc = lightcurves[curr_ind]
+        while True:
+            if curr_ind >= len(lightcurves) - 1:
+                break
+
+            next_lc = lightcurves[curr_ind + 1]
+
+            if curr_lc.last_JD >= next_lc.first_JD:
+                curr_lc = curr_lc.merge(next_lc)
+            else:
+                sorted_lightcurves.append(curr_lc)
+                curr_lc = next_lc
+
+            curr_ind += 1
+
+        sorted_lightcurves.append(curr_lc)
+
+        return sorted_lightcurves
 
     @staticmethod
     def from_lightcurves(id: int, name: str, period: float, data: list[dict]) -> Asteroid:
@@ -50,32 +78,32 @@ class Asteroid(BaseModel):
 
         return res
 
-    def get_lightcurves(self, by: EnumSortOptions = EnumSortOptions.PERIOD) -> list[Lightcurve]:
+    def get_lightcurves(self, by: EnumSortOption = EnumSortOption.PERIOD) -> list[Lightcurve]:
         """
         Get the lightcurves of the asteroid.
 
         :return: The lightcurves.
         """
-        if by == EnumSortOptions.PERIOD:
+        if by == EnumSortOption.PERIOD:
             return sorted(self.lightcurves, key=lambda lc: lc.get_period(), reverse=True)
-        elif by == EnumSortOptions.POINTS:
+        elif by == EnumSortOption.POINTS:
             return sorted(self.lightcurves, key=lambda lc: lc.points_count, reverse=True)
         else:
-            options = ["EnumSortOptions." + option.name for option in EnumSortOptions]
+            options = ["EnumSortOptions." + option.name for option in EnumSortOption]
             raise ValueError(f"Invalid 'by' value: {by}, use: {options}")
 
-    def get_longest_lightcurve(self, by: EnumSortOptions = EnumSortOptions.PERIOD) -> Lightcurve:
+    def get_longest_lightcurve(self, by: EnumSortOption = EnumSortOption.PERIOD) -> Lightcurve:
         """
         Get the longest lightcurve of the asteroid.
 
         :return: The longest lightcurve.
         """
-        if by == EnumSortOptions.PERIOD:
+        if by == EnumSortOption.PERIOD:
             return max(self.lightcurves, key=lambda lc: lc.get_period())
-        elif by == EnumSortOptions.POINTS:
+        elif by == EnumSortOption.POINTS:
             return max(self.lightcurves, key=lambda lc: lc.points_count)
         else:
-            options = ["EnumSortOptions." + option.name for option in EnumSortOptions]
+            options = ["EnumSortOptions." + option.name for option in EnumSortOption]
             raise ValueError(f"Invalid 'by' value: {by}, use: {options}")
 
     @cached_property

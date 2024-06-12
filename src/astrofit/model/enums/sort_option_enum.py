@@ -1,6 +1,6 @@
 from enum import Enum
 
 
-class EnumSortOptions(Enum):
+class EnumSortOption(Enum):
     POINTS = "points"
     PERIOD = "period"

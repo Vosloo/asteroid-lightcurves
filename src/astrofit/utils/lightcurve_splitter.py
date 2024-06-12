@@ -36,15 +36,16 @@ class LightcurveSplitter:
                 curr_points.append(point)
                 continue
 
-            if point.JD - curr_points[0].JD > max_hours_diff / 24:
+            # In hours
+            if 24 * (point.JD - curr_points[-1].JD) > max_hours_diff:
                 if min_no_points is None or len(curr_points) >= min_no_points:
-                    splitted_lightcurves.append(Lightcurve.from_splitted_lightcurve(lightcurve, curr_points))
+                    splitted_lightcurves.append(Lightcurve.from_points(og_lightcurve=lightcurve, points=curr_points))
 
                 curr_points = []
 
             curr_points.append(point)
 
         if curr_points and (min_no_points is None or len(curr_points) >= min_no_points):
-            splitted_lightcurves.append(Lightcurve.from_splitted_lightcurve(lightcurve, curr_points))
+            splitted_lightcurves.append(Lightcurve.from_points(og_lightcurve=lightcurve, points=curr_points))
 
         return splitted_lightcurves
