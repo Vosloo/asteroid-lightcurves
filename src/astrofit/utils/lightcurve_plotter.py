@@ -1,5 +1,6 @@
 import seaborn as sns
 from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 
 from astrofit.model import Lightcurve, LightcurveBin
 
@@ -17,7 +18,34 @@ class LightcurvePlotter:
         lightcurve.plot(color=sns.color_palette("icefire")[0])
         plt.show()
 
-    def plot_lightcurves(self, lightcurves: list[Lightcurve] | LightcurveBin, split_plots: bool = False):
+    def plot_bins_on_grid(self, grid_size: tuple[int, int], bins: list[LightcurveBin]):
+        """
+        Plot the light curve bins on a grid.
+
+        :param grid_size: The size of the grid.
+        :param bins: The light curve bins to plot.
+        """
+        if grid_size[0] * grid_size[1] != len(bins):
+            raise ValueError("Grid size does not match the number of bins!")
+
+        fig, axs = plt.subplots(grid_size[0], grid_size[1], figsize=(14, 8))
+
+        for i, _bin in enumerate(bins):
+            ax = axs[i // grid_size[1], i % grid_size[1]]
+            ax.set_xlabel("Julian Date")
+            ax.set_ylabel("Brightness")
+            ax.set_title(f"{repr(_bin)}")
+            self.plot_lightcurves(_bin, split_plots=False, ax=ax)
+
+        plt.tight_layout()
+        plt.show()
+
+    def plot_lightcurves(
+        self,
+        lightcurves: list[Lightcurve] | LightcurveBin,
+        split_plots: bool = False,
+        ax: Axes | None = None,
+    ):
         """
         Plot the light curves.
 
@@ -37,13 +65,15 @@ class LightcurvePlotter:
             if split_plots:
                 lc.plot(color=colors[i])
                 plt.show()
+            elif ax is not None:
+                lc.plot(color=colors[i], ax=ax)
             else:
                 lc.plot(color=colors[i])
 
         if min_JD is None or max_JD is None:
             raise ValueError("No light curves to plot!")
 
-        if split_plots:
+        if split_plots or ax is not None:
             return
 
         diff = max_JD - min_JD

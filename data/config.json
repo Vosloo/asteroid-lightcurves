@@ -1,0 +1,10 @@
+{
+    "max_hours_diff": 24,
+    "min_no_points": 10,
+    "top_k_bins": 4,
+    "select_bins_by": "points",
+    "max_time_diff": 45,
+    "min_bin_size": 1,
+    "top_k_freqs": 50,
+    "nterms": 3
+}

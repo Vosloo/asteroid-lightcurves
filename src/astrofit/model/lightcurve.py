@@ -6,6 +6,7 @@ from typing import Self
 
 import seaborn as sns
 from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.config import ConfigDict
 
@@ -87,16 +88,12 @@ class Lightcurve(BaseModel):
 
         return Lightcurve.from_points(self, sorted_points)
 
-    def plot(self, color: tuple | None = None):
+    def plot(self, color: tuple | None = None, ax: Axes | None = None):
         """
         Plot the light curve.
         """
         if color is None:
             color = sns.color_palette("icefire")[0]
-
-        plt.scatter(self.time_arr, self.brightness_arr, color=color, s=5)
-        plt.xlabel("JD")
-        plt.ylabel("Brightness")
 
         diff = self.last_JD - self.first_JD
         if diff < 1:
@@ -104,7 +101,13 @@ class Lightcurve(BaseModel):
         else:
             _range = f"{diff:.4f} days"
 
-        plt.title(f"Lightcurve id={self.id} - range={_range}")
+        if ax is None:
+            plt.scatter(self.time_arr, self.brightness_arr, color=color, s=5)
+            plt.xlabel("JD")
+            plt.ylabel("Brightness")
+            plt.title(f"Lightcurve id={self.id} - range={_range}")
+        else:
+            ax.scatter(self.time_arr, self.brightness_arr, color=color, s=5)
 
     @property
     def first_JD(self) -> float:
