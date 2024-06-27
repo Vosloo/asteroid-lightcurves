@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+
 import pandas as pd
 
 from astrofit.model import Asteroid
@@ -39,6 +40,10 @@ class AsteroidLoader:
     def available_asteroids(self) -> dict[str, dict]:
         return self._available_asteroids
 
+    @property
+    def asteroids_df(self) -> pd.DataFrame:
+        return self._asteroids_df
+
     def _load_asteroids_df(self) -> pd.DataFrame:
         asteroid_csv = self._data_dir / "asteroids.csv"
         if not asteroid_csv.exists():
@@ -59,7 +64,7 @@ class AsteroidLoader:
             asteroid_name = directory.name.split("_")[0]
             work_name = directory.name
 
-            res = self._asteroids_df.query(f"name == '{asteroid_name}'")
+            res = self._asteroids_df[self._asteroids_df["name"] == asteroid_name]
             if len(res) != 1:
                 raise ValueError(f"Found multiple asteroids with name {asteroid_name} (work name: {work_name})")
 

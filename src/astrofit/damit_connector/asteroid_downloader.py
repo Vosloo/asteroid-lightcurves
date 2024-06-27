@@ -86,7 +86,7 @@ class AsteroidDownloader:
 
         asteroid_name = self._get_asteroid_name(tbody)  # type: ignore
         if asteroid_name is None:
-            raise ValueError(f"No asteroid name found for query: {query}")
+            raise ValueError(f"No asteroid name found for query: {query}\n")
 
         print(f"Found asteroid: {asteroid_name}")
         self._extract_row_models(asteroid_name, tbody, exists_ok)  # type: ignore

@@ -30,7 +30,7 @@ class Lightcurve(BaseModel):
 
     def __repr__(self) -> str:
         return (
-            f"Lightcurve(id={self.id}, period={self.get_period(in_hours=True):.5f}h "
+            f"Lightcurve(id={self.id}, period={self.get_period(in_hours=True):.5f}h, "
             f"points_count={self.points_count}, first_JD={self.first_JD}, last_JD={self.last_JD})"
         )
 

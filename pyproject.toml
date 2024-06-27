@@ -25,4 +25,5 @@ dependencies = [
   "torch",
   "xgboost",
   "hyperopt",
+  "optuna",
 ]

@@ -61,7 +61,7 @@ class Asteroid(BaseModel):
 
         :return: An Asteroid object.
         """
-        lightcurves = [Lightcurve(**lc[LIGHTCURVE_KEY]) for lc in data]
+        lightcurves = [Lightcurve(**lc) for lc in data]
         return Asteroid(id=id, name=name, period=period, lightcurves=lightcurves)
 
     def get_lightcurve(self, id: int) -> Lightcurve:
