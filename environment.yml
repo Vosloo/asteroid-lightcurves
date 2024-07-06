@@ -13,6 +13,7 @@ dependencies:
   - flake8
   - ipykernel
   - numpy
+  - cupy
   - pandas
   - pyarrow
   - plotly

@@ -54,6 +54,9 @@ class LightcurveBinner:
 
             bin_lightcurves.append(lc)
 
+        if bin_lightcurves:
+            bins.append(LightcurveBin(lightcurves=bin_lightcurves))
+
         if min_bin_size is not None:
             bins = self._filter_bins(bins, min_bin_size)
 
