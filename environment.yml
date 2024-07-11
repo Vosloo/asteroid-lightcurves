@@ -20,7 +20,7 @@ dependencies:
   - pydantic
   - pytest
   - scikit-learn
-  - torch
+  - pytorch
   - pytorch-cuda==12.1
   - seaborn
   - tqdm
