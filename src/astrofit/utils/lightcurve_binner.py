@@ -41,7 +41,7 @@ class LightcurveBinner:
                 elif binning_method == BinningMethodEnum.LAST_TO_FIRST_DIFF:
                     last_bin_JD = lc.last_JD
 
-            if lc.first_JD - last_bin_JD > max_time_diff:
+            if lc.first_JD - last_bin_JD > max_time_diff:  # max_time_diff in days
                 curr_bin += 1
 
                 if binning_method == BinningMethodEnum.FIRST_TO_FIRST_DIFF:

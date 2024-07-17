@@ -25,6 +25,9 @@ class LightcurveBin(BaseModel):
             f"LightcurveBin(lightcurves={len(self.lightcurves)}, period={self.get_period():.5f}h, points={self.points_count})"
         )
 
+    def __str__(self) -> str:
+        return self.__repr__()
+
     def __lt__(self, other: LightcurveBin) -> bool:
         return len(self) < len(other)
 

@@ -1,6 +1,6 @@
 __all__ = [
-    "EnumSortOption",
+    "SortOptionEnum",
 ]
 
 
-from astrofit.model.enums.sort_option_enum import EnumSortOption
+from astrofit.model.enums.sort_option_enum import SortOptionEnum

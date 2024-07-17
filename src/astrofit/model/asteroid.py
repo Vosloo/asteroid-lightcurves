@@ -5,7 +5,7 @@ from functools import cached_property
 import seaborn as sns
 from pydantic import BaseModel, field_validator
 
-from astrofit.model.enums import EnumSortOption
+from astrofit.model.enums import SortOptionEnum
 from astrofit.model.lightcurve import Lightcurve
 
 sns.set_theme()
@@ -78,32 +78,32 @@ class Asteroid(BaseModel):
 
         return res
 
-    def get_lightcurves(self, by: EnumSortOption = EnumSortOption.PERIOD) -> list[Lightcurve]:
+    def get_lightcurves(self, by: SortOptionEnum = SortOptionEnum.PERIOD) -> list[Lightcurve]:
         """
         Get the lightcurves of the asteroid.
 
         :return: The lightcurves.
         """
-        if by == EnumSortOption.PERIOD:
+        if by == SortOptionEnum.PERIOD:
             return sorted(self.lightcurves, key=lambda lc: lc.get_period(), reverse=True)
-        elif by == EnumSortOption.POINTS:
+        elif by == SortOptionEnum.POINTS:
             return sorted(self.lightcurves, key=lambda lc: lc.points_count, reverse=True)
         else:
-            options = ["EnumSortOptions." + option.name for option in EnumSortOption]
+            options = ["EnumSortOptions." + option.name for option in SortOptionEnum]
             raise ValueError(f"Invalid 'by' value: {by}, use: {options}")
 
-    def get_longest_lightcurve(self, by: EnumSortOption = EnumSortOption.PERIOD) -> Lightcurve:
+    def get_longest_lightcurve(self, by: SortOptionEnum = SortOptionEnum.PERIOD) -> Lightcurve:
         """
         Get the longest lightcurve of the asteroid.
 
         :return: The longest lightcurve.
         """
-        if by == EnumSortOption.PERIOD:
+        if by == SortOptionEnum.PERIOD:
             return max(self.lightcurves, key=lambda lc: lc.get_period())
-        elif by == EnumSortOption.POINTS:
+        elif by == SortOptionEnum.POINTS:
             return max(self.lightcurves, key=lambda lc: lc.points_count)
         else:
-            options = ["EnumSortOptions." + option.name for option in EnumSortOption]
+            options = ["EnumSortOptions." + option.name for option in SortOptionEnum]
             raise ValueError(f"Invalid 'by' value: {by}, use: {options}")
 
     @cached_property

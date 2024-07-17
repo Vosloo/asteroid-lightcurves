@@ -1,4 +1,6 @@
-from astrofit.model import Lightcurve
+import numpy as np
+
+from astrofit.model import Lightcurve, Point
 
 
 class LightcurveSplitter:
@@ -38,8 +40,8 @@ class LightcurveSplitter:
 
             # In hours
             if 24 * (point.JD - curr_points[-1].JD) > max_hours_diff:
-                if min_no_points is None or len(curr_points) >= min_no_points:
-                    splitted_lightcurves.append(Lightcurve.from_points(og_lightcurve=lightcurve, points=curr_points))
+                if (filtered_points := self._filter_points(curr_points, min_no_points)) is not None:
+                    splitted_lightcurves.append(Lightcurve.from_points(og_lightcurve=lightcurve, points=filtered_points))
 
                 curr_points = []
 
@@ -49,3 +51,32 @@ class LightcurveSplitter:
             splitted_lightcurves.append(Lightcurve.from_points(og_lightcurve=lightcurve, points=curr_points))
 
         return splitted_lightcurves
+
+    def _filter_points(self, points: list[Point], min_no_points: int | None) -> list[Point] | None:
+        if min_no_points is not None and len(points) < min_no_points:
+            return None
+
+        brightnesses = np.array([point.brightness for point in points])
+
+        median_brightness = np.median(brightnesses)
+        median_absolute_dev = np.median(np.abs(brightnesses - median_brightness))
+
+        if median_absolute_dev == 0:
+            # Use mean absolute deviation instead
+            mean_absolute_dev = np.mean(np.abs(brightnesses - median_brightness))
+            modified_z_score = 0.7979 * (brightnesses - median_brightness) / mean_absolute_dev
+        else:
+            modified_z_score = 0.6745 * (brightnesses - median_brightness) / median_absolute_dev
+
+        filtered = []
+        for point, z_score in zip(points, modified_z_score):
+            if z_score < -3.5 or z_score > 3.5:
+                # Outlier
+                continue
+
+            filtered.append(point)
+
+        if min_no_points is not None and len(filtered) < min_no_points:
+            return None
+
+        return filtered
