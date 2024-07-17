@@ -1,5 +1,5 @@
 outs:
-- md5: ee62d3a457fcf06b84f22d30a0205f38
-  size: 17551308
+- md5: cf9fadb9ed0b26dfe4599624370174f4
+  size: 25602220
   hash: md5
   path: asteroids_freq_data.json
