@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import cached_property
 
 import seaborn as sns
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ValidationError, field_validator
 
 from astrofit.model.enums import SortOptionEnum
 from astrofit.model.lightcurve import Lightcurve
@@ -19,6 +19,8 @@ class Asteroid(BaseModel):
     id: int
     name: str
     period: float
+    lambd: float
+    beta: float
     lightcurves: list[Lightcurve]
 
     @field_validator("lightcurves")
@@ -50,7 +52,7 @@ class Asteroid(BaseModel):
         return sorted_lightcurves
 
     @staticmethod
-    def from_lightcurves(id: int, name: str, period: float, data: list[dict]) -> Asteroid:
+    def from_lightcurves(id: int, name: str, period: float, lambd: float, beta: float, data: list[dict]) -> Asteroid:
         """
         Create an Asteroid object from a list of lightcurves data (list of JSON).
 
@@ -61,8 +63,12 @@ class Asteroid(BaseModel):
 
         :return: An Asteroid object.
         """
-        lightcurves = [Lightcurve(**lc) for lc in data]
-        return Asteroid(id=id, name=name, period=period, lightcurves=lightcurves)
+        try:
+            lightcurves = [Lightcurve(**lc) for lc in data]
+            return Asteroid(id=id, name=name, period=period, lambd=lambd, beta=beta, lightcurves=lightcurves)
+        except ValidationError as e:
+            print(f"Error creating Asteroid {name}!")
+            raise e
 
     def get_lightcurve(self, id: int) -> Lightcurve:
         """
@@ -116,4 +122,7 @@ class Asteroid(BaseModel):
         return {lc.id: lc for lc in self.lightcurves}
 
     def __repr__(self) -> str:
-        return f"Asteroid(id={self.id}, name={self.name}, period={self.period}, lightcurves={len(self.lightcurves)})"
+        return (
+            f"Asteroid(id={self.id}, name={self.name}, period={self.period}, "
+            f"lambda={self.lambd}, beta={self.beta}, lightcurves={len(self.lightcurves)})"
+        )

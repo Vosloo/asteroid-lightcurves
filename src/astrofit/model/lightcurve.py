@@ -51,6 +51,14 @@ class Lightcurve(BaseModel):
         else:
             return points
 
+    @field_validator("points", mode="after")
+    @classmethod
+    def sort_points(cls, points: list[Point]) -> list[Point]:
+        """
+        Sort points by Julian Date.
+        """
+        return sorted(points, key=lambda p: p.JD)
+
     @model_validator(mode="after")
     def check_points_count(self) -> Self:
         """
@@ -58,6 +66,12 @@ class Lightcurve(BaseModel):
         """
         if len(self.points) != self.points_count:
             raise ValueError("Number of points does not match points_count")
+
+        return self
+
+    @model_validator(mode="after")
+    def ensure_positive_period(self) -> Self:
+        assert not self.get_period(in_hours=True) < 0, "Invalid period of light curve!"
 
         return self
 
@@ -136,3 +150,10 @@ class Lightcurve(BaseModel):
         Get the brightness of the light curve.
         """
         return [point.brightness for point in self.points]
+
+    @cached_property
+    def period(self) -> float:
+        """
+        Get the period of the light curve.
+        """
+        return self.get_period(in_hours=True)
