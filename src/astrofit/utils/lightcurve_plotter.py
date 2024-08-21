@@ -1,3 +1,5 @@
+import math
+
 import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
@@ -6,6 +8,9 @@ from astrofit.model import Lightcurve, LightcurveBin
 
 plt.rcParams["figure.figsize"] = (12, 6)
 sns.set_theme()
+
+
+MAX_COLS = 4
 
 
 class LightcurvePlotter:
@@ -18,14 +23,20 @@ class LightcurvePlotter:
         lightcurve.plot(color=sns.color_palette("icefire")[0])
         plt.show()
 
-    def plot_bins_on_grid(self, grid_size: tuple[int, int], bins: list[LightcurveBin]):
+    def plot_bins_on_grid(self, bins: list[LightcurveBin], grid_size: tuple[int, int] | None = None):
         """
         Plot the light curve bins on a grid.
 
         :param grid_size: The size of the grid.
         :param bins: The light curve bins to plot.
         """
-        if grid_size[0] * grid_size[1] != len(bins):
+        if not bins:
+            raise ValueError("No bins to plot!")
+
+        if grid_size is None:
+            grid_size = self._get_grid_size(bins)
+
+        elif grid_size[0] * grid_size[1] != len(bins):
             raise ValueError("Grid size does not match the number of bins!")
 
         fig, axs = plt.subplots(grid_size[0], grid_size[1], figsize=(14, 8))
@@ -127,3 +138,19 @@ class LightcurvePlotter:
 
     def _get_phase(self, pivot_time: float, ref_time: float, period: float) -> float:
         return (pivot_time - ref_time) * 24 % period / period
+
+    def _get_grid_size(self, bins: list[LightcurveBin]) -> tuple[int, int]:
+        n = len(bins)
+        if n == 0:
+            return (0, 0)
+        elif n == 1:
+            return (1, 1)
+
+        columns = min(4, n)
+        rows = math.ceil(n / columns)
+
+        while columns > 1 and rows < columns:
+            columns -= 1
+            rows = math.ceil(n / columns)
+
+        return (rows, columns)
