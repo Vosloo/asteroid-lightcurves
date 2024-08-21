@@ -45,6 +45,7 @@ class LightcurvePlotter:
         lightcurves: list[Lightcurve] | LightcurveBin,
         split_plots: bool = False,
         ax: Axes | None = None,
+        asteroid_name: str = "",
     ):
         """
         Plot the light curves.
@@ -63,12 +64,12 @@ class LightcurvePlotter:
                 max_JD = lc.last_JD
 
             if split_plots:
-                lc.plot(color=colors[i])
+                lc.plot(color=colors[i], asteroid_name=asteroid_name)
                 plt.show()
             elif ax is not None:
-                lc.plot(color=colors[i], ax=ax)
+                lc.plot(color=colors[i], ax=ax, asteroid_name=asteroid_name)
             else:
-                lc.plot(color=colors[i])
+                lc.plot(color=colors[i], asteroid_name=asteroid_name)
 
         if min_JD is None or max_JD is None:
             raise ValueError("No light curves to plot!")
@@ -84,7 +85,12 @@ class LightcurvePlotter:
 
         plt.xlabel("Julian Date")
         plt.ylabel("Brightness")
-        plt.title(f"{len(lightcurves)} lightcurves - range={_range}")
+
+        prefix = asteroid_name
+        if prefix:
+            prefix += " - "
+
+        plt.title(f"{prefix}{len(lightcurves)} lightcurves - range={_range}")
 
         plt.show()
 

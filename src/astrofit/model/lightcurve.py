@@ -102,7 +102,7 @@ class Lightcurve(BaseModel):
 
         return Lightcurve.from_points(self, sorted_points)
 
-    def plot(self, color: tuple | None = None, ax: Axes | None = None):
+    def plot(self, color: tuple | None = None, ax: Axes | None = None, asteroid_name: str = ""):
         """
         Plot the light curve.
         """
@@ -119,7 +119,12 @@ class Lightcurve(BaseModel):
             plt.scatter(self.time_arr, self.brightness_arr, color=color, s=5)
             plt.xlabel("JD")
             plt.ylabel("Brightness")
-            plt.title(f"Lightcurve id={self.id} - range={_range}")
+
+            prefix = asteroid_name
+            if prefix:
+                prefix += " - "
+
+            plt.title(f"{prefix}Lightcurve id={self.id} - range={_range}")
         else:
             ax.scatter(self.time_arr, self.brightness_arr, color=color, s=5)
 
