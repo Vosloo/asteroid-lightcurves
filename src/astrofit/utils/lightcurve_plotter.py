@@ -110,6 +110,7 @@ class LightcurvePlotter:
         lightcurves: list[Lightcurve] | LightcurveBin,
         period: float,
         known_period: float | None = None,
+        asteroid_name: str = "",
     ):
         ref_JD = None
         for lc in lightcurves:
@@ -131,7 +132,11 @@ class LightcurvePlotter:
         if known_period is not None:
             diff_known = f" ~ diff from known: {abs(known_period - period):.5f}"
 
-        plt.title(f"Phased {len(lightcurves)} lightcurves (period: {period:.5f}h{diff_known})")
+        prefix = asteroid_name
+        if prefix:
+            prefix += " - "
+
+        plt.title(f"{prefix}Phased {len(lightcurves)} lightcurves (period: {period:.5f}h{diff_known})")
         plt.xlabel("Phase")
         plt.ylabel("Brightness")
         plt.show()
